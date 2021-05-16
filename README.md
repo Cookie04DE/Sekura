@@ -35,7 +35,7 @@ This adds a disk previously created by `createDisk` to read and write partitions
 ### createPartition:
 This creates a partition on a previously added/created disk and adds it.
 
-**Warning:** mount all partitions on the disk before using this command as you might otherwise encounter **data loss**.
+**Warning:** add all partitions on the disk before using this command as you might otherwise encounter **data loss**.
 
 Sekura will ask you for the number of the disk you want to create the partition on.
 
