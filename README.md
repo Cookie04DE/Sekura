@@ -29,7 +29,7 @@ This creates and adds a disk for use with Sekura.
 
 It asks you for a block size and a block count. You may enter the size as a number with a suffix (e.g "4mb", "10GB", "1tb"). The final size of the disk will be the size multiplied by the count plus 20 bytes for the disk header.
 
-The more blocks you choose the more file systems can fit on that disk. The block size needs to be a minimum of 32 bytes to accommodate the block header, but more size is needed to actually store data.
+The more blocks you choose the more file systems can fit on that disk. The block size needs to be a minimum of 32 bytes to accommodate the block header, but more bytes are needed to actually store data.
 ### addDisk:
 This adds a disk previously created by `createDisk` to read and write partitions on it.
 ### createPartition:
