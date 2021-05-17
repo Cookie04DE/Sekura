@@ -11,7 +11,7 @@ It allows for multiple, independent file systems on a single disk whose existenc
 # How to use
 
 1. Clone this repository
-2. `cd` into `cmd/Sekura` and run `go install .`
+2. `cd` into `cmd/sekura` and run `go install .`
 
 Note: the following steps require root permissions
 
