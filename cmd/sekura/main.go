@@ -101,7 +101,7 @@ scanloop:
 				}
 				blockCount = int64(bc)
 			} else {
-				f, err := os.Open(absPath)
+				f, err := os.OpenFile(absPath, os.O_RDWR, 0755)
 				if err != nil {
 					fmt.Println("Error opening disk: " + err.Error())
 					continue scanloop
