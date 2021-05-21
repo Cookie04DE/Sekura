@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"errors"
 	"log"
 	"net"
 	"os"
@@ -42,6 +43,9 @@ func main() {
 	for {
 		if func() bool {
 			conn, err := ln.Accept()
+			if errors.Is(err, net.ErrClosed) {
+				return true
+			}
 			if err != nil {
 				return false
 			}
