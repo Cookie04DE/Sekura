@@ -211,11 +211,9 @@ scanloop:
 			}
 			diskNum--
 			disk := disks[diskNum]
-			fmt.Print("Enter password: ")
-			if !scanner.Scan() {
-				break scanloop
-			}
-			partition, err := disk.GetPartition(scanner.Text())
+			password := ""
+			getPassword(&password, false)
+			partition, err := disk.GetPartition(password)
 			if err != nil {
 				fmt.Println("Error opening partition: " + err.Error())
 				continue scanloop
@@ -239,11 +237,8 @@ scanloop:
 			}
 			diskNum--
 			disk := disks[diskNum]
-			fmt.Print("Enter password: ")
-			if !scanner.Scan() {
-				break scanloop
-			}
-			password := scanner.Text()
+			password := ""
+			getPassword(&password, false)
 			_, err = disk.GetPartition(password)
 			if err == nil {
 				fmt.Println("A partition with this password already exists!")
@@ -282,11 +277,9 @@ scanloop:
 			}
 			diskNum--
 			disk := disks[diskNum]
-			fmt.Print("Enter password: ")
-			if !scanner.Scan() {
-				break scanloop
-			}
-			partition, err := disk.GetPartition(scanner.Text())
+			password := ""
+			getPassword(&password, false)
+			partition, err := disk.GetPartition(password)
 			if err != nil {
 				fmt.Println("Error opening partition: " + err.Error())
 				continue scanloop
