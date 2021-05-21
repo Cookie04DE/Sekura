@@ -15,8 +15,8 @@ import (
 
 	rubberhose "github.com/Cookie04DE/RubberHose"
 	"github.com/inhies/go-bytesize"
-	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/sys/unix"
+	"golang.org/x/term"
 )
 
 func addCommonFlags(fs *flag.FlagSet) (*bool, *string, *string) {
@@ -40,7 +40,7 @@ func getPassword(password *string, parsable bool) string {
 	if !parsable {
 		fmt.Print("Please enter the password: ")
 	}
-	passwordBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+	passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
 	fmt.Println()
 	if err != nil {
 		fatalParsable(parsable, "Error reading password: ", err)
