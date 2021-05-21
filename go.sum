@@ -5,12 +5,12 @@ github.com/dop251/buse v0.0.0-20170916130217-f7a5c857babd h1:qpCOeA2LdufRrCcU8/B
 github.com/dop251/buse v0.0.0-20170916130217-f7a5c857babd/go.mod h1:hQb8UeARubyuKpfzN+fkxK9TTytxdWRCalLjf/FQgwk=
 github.com/dop251/nbd v0.0.0-20170916130042-b8933b281cb7 h1:mNIccc19FsLtxQl5bnGUJiu0xoyhE2yxaIypx1cIdj8=
 github.com/dop251/nbd v0.0.0-20170916130042-b8933b281cb7/go.mod h1:/YqO/I24sucjxhCgQHgDrnffSwg5HzoYHQASayZnYl8=
-github.com/inhies/go-bytesize v0.0.0-20201103132853-d0aed0d254f8 h1:RrGCja4Grfz7QM2hw+SUZIYlbHoqBfbvzlWRT3seXB8=
-github.com/inhies/go-bytesize v0.0.0-20201103132853-d0aed0d254f8/go.mod h1:KrtyD5PFj++GKkFS/7/RRrfnRhAMGQwy75GLCHWrCNs=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/shenwei356/util v2020.12.31+incompatible h1:CQYnsFHZ6A6OdDTnx/+xYbY4AhRFXaTG1muSvOJZGEo=
+github.com/shenwei356/util v2020.12.31+incompatible/go.mod h1:n3qhc3bQzlqJ2/5v79hgl0Gd3WzJOkI8XcUix25Brdg=
 github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

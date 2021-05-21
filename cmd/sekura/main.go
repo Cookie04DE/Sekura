@@ -14,7 +14,7 @@ import (
 	"syscall"
 
 	rubberhose "github.com/Cookie04DE/RubberHose"
-	"github.com/inhies/go-bytesize"
+	"github.com/shenwei356/util/bytesize"
 	"golang.org/x/sys/unix"
 	"golang.org/x/term"
 )
