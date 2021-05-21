@@ -216,3 +216,12 @@ func (b *Block) writeAt(p []byte, off int64) (int, error) {
 func (b *Block) WriteAt(p []byte, off int64) (int, error) {
 	return b.writeAt(p, off+dataOffset)
 }
+
+func (b *Block) Delete() error {
+	_, err := b.File.Seek(b.offset, 0)
+	if err != nil {
+		return err
+	}
+	_, err = io.CopyN(b.File, rand.Reader, b.size)
+	return err
+}

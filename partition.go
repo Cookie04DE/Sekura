@@ -10,6 +10,7 @@ import (
 )
 
 type Partition struct {
+	*Disk
 	blockSize int64
 	blocks    []*Block
 }
@@ -130,4 +131,15 @@ func (par Partition) Mount() (string, *buse.Device) {
 		}
 		return path, bd
 	}
+}
+
+func (par Partition) Delete() error {
+	for _, b := range par.blocks {
+		err := b.Delete()
+		if err != nil {
+			return err
+		}
+		delete(par.Disk.usedBlocks, b.blockNum)
+	}
+	return nil
 }

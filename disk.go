@@ -157,7 +157,7 @@ func (d Disk) GetPartition(password string) (*Partition, error) {
 	if err != nil {
 		return nil, err
 	}
-	part := &Partition{blockSize: blockSize, blocks: blocks}
+	part := &Partition{blockSize: blockSize, blocks: blocks, Disk: &d}
 	err = part.orderBlocks()
 	return part, err
 }

@@ -266,6 +266,37 @@ scanloop:
 			path, bd := partition.Mount()
 			defer bd.Disconnect()
 			fmt.Printf("Success! Partition mounted as %s!\n", path)
+		case "delete":
+			fmt.Print("Enter disk num: ")
+			if !scanner.Scan() {
+				break scanloop
+			}
+			diskNum, err := strconv.Atoi(scanner.Text())
+			if err != nil {
+				fmt.Println("Error parsing disk num: " + err.Error())
+				continue scanloop
+			}
+			if diskNum > len(disks) {
+				fmt.Println("Invalid disk num")
+				continue scanloop
+			}
+			diskNum--
+			disk := disks[diskNum]
+			fmt.Print("Enter password: ")
+			if !scanner.Scan() {
+				break scanloop
+			}
+			partition, err := disk.GetPartition(scanner.Text())
+			if err != nil {
+				fmt.Println("Error opening partition: " + err.Error())
+				continue scanloop
+			}
+			err = partition.Delete()
+			if err != nil {
+				fmt.Println("Error deleting partition: " + err.Error())
+				continue scanloop
+			}
+			fmt.Println("Successfully deleted partition.")
 		}
 	}
 }

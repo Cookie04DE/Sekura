@@ -46,7 +46,8 @@ After that Sekura will ask you for the amount of blocks you want to allocate for
 This adds a previously created partition.
 
 Sekura will ask you for the number of the disk and a password.
-
+### delete:
+This deletes a partition by overwriting all blocks in it with random data.
 # How to use added partitions:
 
 Once a partition is created/added you will receive the path to the block device (e.g. "/dev/nbd0").
