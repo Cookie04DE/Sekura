@@ -30,8 +30,16 @@ type Disk struct {
 	usedBlocks map[int64]struct{}
 }
 
-func NewDisk(file *os.File) Disk {
-	return Disk{File: file, usedBlocks: make(map[int64]struct{})}
+func NewDisk(path string) (*Disk, error) {
+	f, err := os.OpenFile(path, os.O_RDWR, 0755)
+	if err != nil {
+		return nil, err
+	}
+	return &Disk{File: f, usedBlocks: make(map[int64]struct{})}, nil
+}
+
+func NewDiskFromFile(f *os.File) Disk {
+	return Disk{File: f, usedBlocks: make(map[int64]struct{})}
 }
 
 func (d Disk) Verify() error {

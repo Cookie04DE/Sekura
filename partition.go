@@ -2,7 +2,11 @@ package rubberhose
 
 import (
 	"errors"
+	"fmt"
 	"io"
+	"log"
+
+	"github.com/dop251/buse"
 )
 
 type Partition struct {
@@ -106,4 +110,24 @@ func (par Partition) orderBlocks() error {
 
 func (par Partition) Close() error {
 	return nil
+}
+
+var counter int
+
+func (par Partition) Mount() (string, *buse.Device) {
+	for {
+		path := fmt.Sprintf("/dev/nbd%d", counter)
+		counter++
+		bd, err := buse.NewDevice(path, par.GetDataSize(), par)
+		go func() {
+			err := bd.Run()
+			if err != nil {
+				log.Fatal("Hallo ", err)
+			}
+		}()
+		if err != nil {
+			continue
+		}
+		return path, bd
+	}
 }

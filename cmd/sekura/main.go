@@ -2,22 +2,107 @@ package main
 
 import (
 	"bufio"
+	"encoding/gob"
+	"flag"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 
 	rubberhose "github.com/Cookie04DE/RubberHose"
-	"github.com/dop251/buse"
 	"github.com/inhies/go-bytesize"
+	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/sys/unix"
 )
 
-var counter int
+func addCommonFlags(fs *flag.FlagSet) (*bool, *string, *string) {
+	parsable := fs.Bool("parsable", false, "Provide output in machine parsable output instead of human readable format")
+	disk := fs.String("disk", "", "The sekura disk to work on")
+	password := fs.String("password", "", "The password of the partition to work on (can also be provided interactively)")
+	return parsable, disk, password
+}
+
+func fatalParsable(parsable bool, a ...interface{}) {
+	if !parsable {
+		log.Fatal(a...)
+	}
+	log.Fatal()
+}
+
+func getPassword(password *string, parsable bool) string {
+	if pw := *password; pw != "" {
+		return pw
+	}
+	if !parsable {
+		fmt.Print("Please enter the password: ")
+	}
+	passwordBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+	fmt.Println()
+	if err != nil {
+		fatalParsable(parsable, "Error reading password: ", err)
+	}
+	pw := string(passwordBytes)
+	if pw == "" {
+		fatalParsable(parsable, "Empty password!")
+	}
+	return pw
+}
 
 func main() {
+	standalone := flag.Bool("standalone", false, "Runs Sekura in standalone mode not relying on the daemon.")
+	flag.Parse()
+	if *standalone {
+		runStandaloneMode()
+		return
+	}
+	addCmd := flag.NewFlagSet("add", flag.ExitOnError)
+	parsable, disk, password := addCommonFlags(addCmd)
+	if len(os.Args) == 1 {
+		flag.Usage()
+		return
+	}
+	conn, err := net.Dial("unix", "/run/sekura.sock")
+	if err != nil {
+		log.Fatal("Error opening connection to daemon: " + err.Error())
+	}
+	rubberhose.RegisterGob()
+	d := gob.NewDecoder(conn)
+	e := gob.NewEncoder(conn)
+	switch os.Args[1] {
+	default:
+		flag.Usage()
+		return
+	case "add":
+		addCmd.Parse(os.Args[2:])
+		if *disk == "" {
+			log.Fatal("Please provide a disk with the -disk flag")
+		}
+		pw := getPassword(password, *parsable)
+		err = e.Encode(&rubberhose.Request{ID: rubberhose.AddRequestID, Data: rubberhose.AddRequest{DiskPath: *disk, Password: pw}})
+		if err != nil {
+			log.Fatal("Error writing to daemon socket: " + err.Error())
+		}
+		response := &rubberhose.AddResponse{}
+		err = d.Decode(response)
+		if err != nil {
+			log.Fatal("Error reading from daemon socket: " + err.Error())
+		}
+		if response.Error != "" {
+			log.Fatal("Deamon reported error while adding partition: " + response.Error)
+		}
+		if *parsable {
+			fmt.Print(response.DevicePath)
+			return
+		}
+		fmt.Println("Success. Device Path: " + response.DevicePath)
+	}
+}
+
+func runStandaloneMode() {
 	if unix.Geteuid() != 0 {
 		log.Fatal("Sekura requires root permissions to work")
 	}
@@ -50,16 +135,12 @@ scanloop:
 				fmt.Println("Error turning path into absolute path: " + err.Error())
 				continue scanloop
 			}
-			if _, err := os.Stat(absPath); err != nil {
-				fmt.Println("Unknown file")
-				continue scanloop
-			}
-			f, err := os.OpenFile(absPath, os.O_RDWR, 0755)
+			disk, err := rubberhose.NewDisk(absPath)
 			if err != nil {
-				fmt.Println("Error opening file: " + err.Error())
+				fmt.Println("Error opening disk: " + err.Error())
 				continue scanloop
 			}
-			disks = append(disks, rubberhose.NewDisk(f))
+			disks = append(disks, *disk)
 			fmt.Printf("Success! Disk num %d.\n", len(disks))
 		case "createdisk":
 			fmt.Print("Enter path: ")
@@ -81,15 +162,14 @@ scanloop:
 				fmt.Println("Error parsing byte size: " + err.Error())
 				continue scanloop
 			}
-			var file *os.File
 			var blockCount int64
+			var disk rubberhose.Disk
 			if _, err := os.Stat(absPath); err != nil {
 				f, err := os.Create(absPath)
 				if err != nil {
 					fmt.Println("Error creating disk: " + err.Error())
 					continue scanloop
 				}
-				file = f
 				fmt.Print("Enter block count: ")
 				if !scanner.Scan() {
 					break scanloop
@@ -100,15 +180,14 @@ scanloop:
 					continue scanloop
 				}
 				blockCount = int64(bc)
+				disk = rubberhose.NewDiskFromFile(f)
 			} else {
-				f, err := os.OpenFile(absPath, os.O_RDWR, 0755)
+				d, err := rubberhose.NewDisk(absPath)
 				if err != nil {
 					fmt.Println("Error opening disk: " + err.Error())
-					continue scanloop
 				}
-				file = f
+				disk = *d
 			}
-			disk := rubberhose.NewDisk(file)
 			err = disk.Write(int64(bs), blockCount)
 			if err != nil {
 				fmt.Println("Error writing disk: " + err.Error())
@@ -141,15 +220,9 @@ scanloop:
 				fmt.Println("Error opening partition: " + err.Error())
 				continue scanloop
 			}
-			for {
-				path, bd, err := mount(*partition)
-				if err != nil {
-					continue
-				}
-				defer bd.Disconnect()
-				fmt.Printf("Success! Partition mounted as %s!\n", path)
-				break
-			}
+			path, bd := partition.Mount()
+			defer bd.Disconnect()
+			fmt.Printf("Success! Partition mounted as %s!\n", path)
 		case "createpartition":
 			fmt.Print("Enter disk num: ")
 			if !scanner.Scan() {
@@ -190,28 +263,9 @@ scanloop:
 				fmt.Println("Error writing partition: " + err.Error())
 				continue scanloop
 			}
-			for {
-				path, bd, err := mount(*partition)
-				if err != nil {
-					continue
-				}
-				defer bd.Disconnect()
-				fmt.Printf("Success! Partition mounted as %s!\n", path)
-				break
-			}
+			path, bd := partition.Mount()
+			defer bd.Disconnect()
+			fmt.Printf("Success! Partition mounted as %s!\n", path)
 		}
 	}
-}
-
-func mount(p rubberhose.Partition) (string, *buse.Device, error) {
-	path := fmt.Sprintf("/dev/nbd%d", counter)
-	counter++
-	bd, err := buse.NewDevice(path, p.GetDataSize(), p)
-	go func() {
-		err := bd.Run()
-		if err != nil {
-			log.Fatal("Hallo ", err)
-		}
-	}()
-	return path, bd, err
 }
