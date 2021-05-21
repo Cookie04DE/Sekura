@@ -11,7 +11,7 @@ import (
 func TestDisk(t *testing.T) {
 	f, err := os.CreateTemp("", "")
 	require.NoError(t, err)
-	d := rubberhose.NewDisk(f)
+	d := rubberhose.NewDiskFromFile(f)
 	err = d.Write(rubberhose.MinBlockSize+10, 10)
 	require.NoError(t, err)
 	testPass := "test"
