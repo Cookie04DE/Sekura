@@ -1,0 +1,9 @@
+[Unit]
+Description=Sekura Daemon
+
+[Service]
+Type=simple
+ExecStart=PATH_TO_BINARY_HERE
+
+[Install]
+WantedBy=multi-user.target
