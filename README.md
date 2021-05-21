@@ -16,7 +16,7 @@ It allows for multiple, independent file systems on a single disk whose existenc
 Note: the following steps require root permissions
 
 3. Run `modprobe nbd` to start the [nbd](https://en.wikipedia.org/wiki/Network_block_device) kernel module
-4. Run `sekura` to enter the command line
+4. Run `sekura -standalone` to enter the command line
 
 # Command line
 ## Commands:
