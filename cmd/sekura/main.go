@@ -157,7 +157,7 @@ scanloop:
 			if !scanner.Scan() {
 				break scanloop
 			}
-			bs, err := bytesize.Parse(scanner.Text())
+			bs, err := bytesize.Parse([]byte(scanner.Text()))
 			if err != nil {
 				fmt.Println("Error parsing byte size: " + err.Error())
 				continue scanloop
