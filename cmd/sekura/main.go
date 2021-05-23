@@ -253,7 +253,7 @@ scanloop:
 				fmt.Println("Error parsing block count: " + err.Error())
 				continue scanloop
 			}
-			partition, err := disk.WritePartition(password, int64(blockCount))
+			partition, err := disk.WritePartition(pw, int64(blockCount))
 			if err != nil {
 				fmt.Println("Error writing partition: " + err.Error())
 				continue scanloop
