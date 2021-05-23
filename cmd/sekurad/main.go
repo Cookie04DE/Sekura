@@ -98,6 +98,39 @@ func main() {
 						if err != nil {
 							break outer
 						}
+					case rubberhose.DeleteRequestID:
+						dr := request.Data.(*rubberhose.DeleteRequest)
+						dp := dr.DiskPath
+						disk, ok := disks[dp]
+						if !ok {
+							d, err := rubberhose.NewDisk(dp)
+							if err != nil {
+								err := e.Encode(&rubberhose.AddResponse{Error: err.Error()})
+								if err != nil {
+									break outer
+								}
+								break
+							}
+							disk = *d
+							disks[dp] = disk
+						}
+						partition, err := disk.GetPartition(dr.Password)
+						if err != nil {
+							err := e.Encode(&rubberhose.AddResponse{Error: err.Error()})
+							if err != nil {
+								break outer
+							}
+							break
+						}
+						err = partition.Delete()
+						errstring := ""
+						if err != nil {
+							errstring = err.Error()
+						}
+						err = e.Encode(&rubberhose.DeleteResponse{Error: errstring})
+						if err != nil {
+							break outer
+						}
 					}
 				}
 			}()

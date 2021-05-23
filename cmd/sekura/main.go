@@ -19,13 +19,6 @@ import (
 	"golang.org/x/term"
 )
 
-func addCommonFlags(fs *flag.FlagSet) (*bool, *string, *string) {
-	parsable := fs.Bool("parsable", false, "Provide output in machine parsable output instead of human readable format")
-	disk := fs.String("disk", "", "The sekura disk to work on")
-	password := fs.String("password", "", "The password of the partition to work on (can also be provided interactively)")
-	return parsable, disk, password
-}
-
 func fatalParsable(parsable bool, a ...interface{}) {
 	if !parsable {
 		log.Fatal(a...)
@@ -54,15 +47,16 @@ func getPassword(password *string, parsable bool) string {
 
 func main() {
 	standalone := flag.Bool("standalone", false, "Runs Sekura in standalone mode not relying on the daemon.")
+	parsable := flag.Bool("parsable", false, "Provide output in machine parsable output instead of human readable format")
+	disk := flag.String("disk", "", "The sekura disk to work on")
+	password := flag.String("password", "", "The password of the partition to work on (can also be provided interactively)")
 	flag.Parse()
 	if *standalone {
 		runStandaloneMode()
 		return
 	}
-	addCmd := flag.NewFlagSet("add", flag.ExitOnError)
-	parsable, disk, password := addCommonFlags(addCmd)
 	if len(os.Args) == 1 {
-		flag.Usage()
+		usage()
 		return
 	}
 	conn, err := net.Dial("unix", "/run/sekura.sock")
@@ -72,12 +66,11 @@ func main() {
 	rubberhose.RegisterGob()
 	d := gob.NewDecoder(conn)
 	e := gob.NewEncoder(conn)
-	switch os.Args[1] {
+	switch flag.Arg(0) {
 	default:
-		flag.Usage()
+		usage()
 		return
 	case "add":
-		addCmd.Parse(os.Args[2:])
 		if *disk == "" {
 			log.Fatal("Please provide a disk with the -disk flag")
 		}
@@ -86,7 +79,7 @@ func main() {
 			log.Fatal("Error turning path into absolute path: " + err.Error())
 		}
 		pw := getPassword(password, *parsable)
-		err = e.Encode(&rubberhose.Request{ID: rubberhose.AddRequestID, Data: rubberhose.AddRequest{DiskPath: *disk, Password: pw}})
+		err = e.Encode(&rubberhose.Request{ID: rubberhose.AddRequestID, Data: rubberhose.AddRequest{DiskPath: absPath, Password: pw}})
 		if err != nil {
 			log.Fatal("Error writing to daemon socket: " + err.Error())
 		}
@@ -103,7 +96,41 @@ func main() {
 			return
 		}
 		fmt.Println("Success. Device Path: " + response.DevicePath)
+	case "delete":
+		if *disk == "" {
+			log.Fatal("Please provide a disk with the -disk flag")
+		}
+		absPath, err := filepath.Abs(*disk)
+		if err != nil {
+			log.Fatal("Error turning path into absolute path: " + err.Error())
+		}
+		pw := getPassword(password, *parsable)
+		err = e.Encode(&rubberhose.Request{ID: rubberhose.DeleteRequestID, Data: rubberhose.DeleteRequest{DiskPath: absPath, Password: pw}})
+		if err != nil {
+			log.Fatal("Error writing to daemon socket: " + err.Error())
+		}
+		response := &rubberhose.DeleteResponse{}
+		err = d.Decode(response)
+		if err != nil {
+			log.Fatal("Error reading from daemon socket: " + err.Error())
+		}
+		if response.Error != "" {
+			log.Fatal("Deamon reported error while deleting partition: " + response.Error)
+		}
+		if *parsable {
+			return
+		}
+		fmt.Println("Successfully deleted partition!")
 	}
+}
+
+func usage() {
+	fmt.Println(`Sekura CLI
+Commands:
+ add: -disk required, -password optional
+ remove: -disk required -password optional
+Example:
+$ sekura -disk /path/to/my/disk add`)
 }
 
 func runStandaloneMode() {
