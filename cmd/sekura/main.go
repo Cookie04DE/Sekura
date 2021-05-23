@@ -81,6 +81,10 @@ func main() {
 		if *disk == "" {
 			log.Fatal("Please provide a disk with the -disk flag")
 		}
+		absPath, err := filepath.Abs(*disk)
+		if err != nil {
+			log.Fatal("Error turning path into absolute path: " + err.Error())
+		}
 		pw := getPassword(password, *parsable)
 		err = e.Encode(&rubberhose.Request{ID: rubberhose.AddRequestID, Data: rubberhose.AddRequest{DiskPath: *disk, Password: pw}})
 		if err != nil {
