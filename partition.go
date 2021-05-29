@@ -19,7 +19,7 @@ func NewPartition(blockSize int64, blocks []*Block) Partition {
 	return Partition{blockSize: blockSize, blocks: blocks}
 }
 
-func (par Partition) ReadAt(p []byte, off int64) (int, error) {
+func (par *Partition) ReadAt(p []byte, off int64) (int, error) {
 	blockNum := off / par.blockSize
 	blockOff := off % par.blockSize
 	if blockNum > int64(len(par.blocks)) {
@@ -41,7 +41,7 @@ func (par Partition) ReadAt(p []byte, off int64) (int, error) {
 	return originalLength, nil
 }
 
-func (par Partition) WriteAt(p []byte, off int64) (int, error) {
+func (par *Partition) WriteAt(p []byte, off int64) (int, error) {
 	blockNum := off / par.blockSize
 	blockOff := off % par.blockSize
 	if blockNum > int64(len(par.blocks)) {
@@ -63,7 +63,7 @@ func (par Partition) WriteAt(p []byte, off int64) (int, error) {
 	return originalLength, nil
 }
 
-func (par Partition) GetDataSize() int64 {
+func (par *Partition) GetDataSize() int64 {
 	var size int64
 	for _, b := range par.blocks {
 		size += b.GetDataSize()
@@ -71,7 +71,7 @@ func (par Partition) GetDataSize() int64 {
 	return size
 }
 
-func (par Partition) orderBlocks() error {
+func (par *Partition) orderBlocks() error {
 	blocks := par.blocks
 	finished := make([]*Block, 0, len(par.blocks))
 	for len(blocks) != 0 {
@@ -109,13 +109,13 @@ func (par Partition) orderBlocks() error {
 	return nil
 }
 
-func (par Partition) Close() error {
-	return nil
+func (par *Partition) Close() error {
+	return par.Sync()
 }
 
 var counter int
 
-func (par Partition) Mount() (string, *buse.Device) {
+func (par *Partition) Mount() (string, *buse.Device) {
 	for {
 		path := fmt.Sprintf("/dev/nbd%d", counter)
 		counter++
