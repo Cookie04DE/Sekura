@@ -119,7 +119,7 @@ func (d Disk) GetBlock(blockNum int64, key []byte) (*Block, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewBlock(d.File, key, dataOffset, blockNum, blockSize)
+	return NewBlock(&d, key, dataOffset, blockNum, blockSize)
 }
 
 func (d Disk) getKey(password string) ([]byte, error) {

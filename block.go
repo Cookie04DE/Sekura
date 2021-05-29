@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 )
 
 var blockStartingMagic = []byte{144, 53, 207, 44, 57, 127, 48, 142}
@@ -30,7 +29,7 @@ const ( //in bytes
 )
 
 type Block struct {
-	*os.File
+	*Disk
 	offset    int64
 	maxOffset int64
 
@@ -42,7 +41,7 @@ type Block struct {
 	iv          []byte
 }
 
-func NewBlock(f *os.File, key []byte, off, num, size int64) (*Block, error) {
+func NewBlock(d *Disk, key []byte, off, num, size int64) (*Block, error) {
 	if size < MinBlockSize {
 		return nil, fmt.Errorf("Block size %d too small, must be at least %d", size, MinBlockSize)
 	}
@@ -51,7 +50,7 @@ func NewBlock(f *os.File, key []byte, off, num, size int64) (*Block, error) {
 		return nil, err
 	}
 	offset := size*num + off
-	return &Block{File: f, offset: offset, blockNum: num, maxOffset: offset + size, size: size, blockCipher: bc}, nil
+	return &Block{Disk: d, offset: offset, blockNum: num, maxOffset: offset + size, size: size, blockCipher: bc}, nil
 }
 
 func (b *Block) GetDataSize() int64 {
@@ -223,5 +222,6 @@ func (b *Block) Delete() error {
 		return err
 	}
 	_, err = io.CopyN(b.File, rand.Reader, b.size)
+	delete(b.Disk.usedBlocks, b.blockNum)
 	return err
 }
