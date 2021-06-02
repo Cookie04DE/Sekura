@@ -94,7 +94,7 @@ func (d Disk) Write(blockSize, blockCount int64) error {
 	if err != nil {
 		return err
 	}
-	d.Seek(diskDataOffset, 0)
+	_, err = d.Seek(diskDataOffset, 0)
 	if err != nil {
 		return err
 	}
