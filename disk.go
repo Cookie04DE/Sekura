@@ -176,8 +176,7 @@ func (d Disk) WritePartition(password string, blockCount int64) (*Partition, err
 	blocks := make([]*Block, 0, blockCount)
 	for i := int64(0); i < blockCount; i++ {
 		var blockID int64
-		c := true
-		for c {
+		for true {
 			if len(d.usedBlocks) == int(blocksOnDisk) {
 				return nil, errors.New("all blocks allocated")
 			}
