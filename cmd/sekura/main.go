@@ -171,8 +171,18 @@ scanloop:
 				fmt.Println("Error opening disk: " + err.Error())
 				continue scanloop
 			}
+			bs, err := disk.GetBlockSize()
+			if err != nil {
+				fmt.Println("Error reading disk block size: " + err.Error())
+				continue scanloop
+			}
+			bc, err := disk.GetBlockCount()
+			if err != nil {
+				fmt.Println("Error reading disk block count: " + err.Error())
+				continue scanloop
+			}
 			disks = append(disks, *disk)
-			fmt.Printf("Success! Disk num %d.\n", len(disks))
+			fmt.Printf("Success! Disk num %d (Blocksize: %s, Blockcount: %d).\n", len(disks), ByteSizeToHumanReadable(bs), bc)
 		case "createdisk":
 			fmt.Print("Enter path: ")
 			if !scanner.Scan() {
