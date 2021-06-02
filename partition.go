@@ -63,6 +63,10 @@ func (par *Partition) WriteAt(p []byte, off int64) (int, error) {
 	return originalLength, nil
 }
 
+func (par *Partition) GetBlockCount() int {
+	return len(par.blocks)
+}
+
 func (par *Partition) GetDataSize() int64 {
 	var size int64
 	for _, b := range par.blocks {
