@@ -251,7 +251,7 @@ scanloop:
 			}
 			path, bd := partition.Mount()
 			defer bd.Disconnect()
-			fmt.Printf("Success! Partition mounted as %s!\n", path)
+			fmt.Printf("Success! Partition mounted as %s! Blockcount: %d, Total Size: %s\n", path, partition.GetBlockCount(), ByteSizeToHumanReadable(partition.GetDataSize()))
 		case "createpartition":
 			fmt.Print("Enter disk num: ")
 			if !scanner.Scan() {
@@ -323,4 +323,18 @@ scanloop:
 			fmt.Println("Successfully deleted partition.")
 		}
 	}
+}
+
+func ByteSizeToHumanReadable(size int64) string {
+	const unit = 1000
+	if size < unit {
+		return fmt.Sprintf("%d B", size)
+	}
+	div, exp := int64(unit), 0
+	for n := size / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB",
+		float64(size)/float64(div), "kMGTPE"[exp])
 }
