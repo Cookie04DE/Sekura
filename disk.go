@@ -54,7 +54,7 @@ func (d Disk) Verify() error {
 	return nil
 }
 
-func (d Disk) getBlockSize() (int64, error) {
+func (d Disk) GetBlockSize() (int64, error) {
 	bs := make([]byte, blockSizeSize)
 	_, err := d.ReadAt(bs, blockSizeOffset)
 	if err != nil {
@@ -107,7 +107,7 @@ func (d Disk) GetBlockCount() (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	blockSize, err := d.getBlockSize()
+	blockSize, err := d.GetBlockSize()
 	if err != nil {
 		return 0, err
 	}
@@ -115,7 +115,7 @@ func (d Disk) GetBlockCount() (int64, error) {
 }
 
 func (d Disk) GetBlock(blockNum int64, key []byte) (*Block, error) {
-	blockSize, err := d.getBlockSize()
+	blockSize, err := d.GetBlockSize()
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (d Disk) GetPartition(password string) (*Partition, error) {
 	if len(blocks) == 0 {
 		return nil, errors.New("no partition with that password")
 	}
-	blockSize, err := d.getBlockSize()
+	blockSize, err := d.GetBlockSize()
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +208,7 @@ func (d Disk) WritePartition(password string, blockCount int64) (*Partition, err
 	if err != nil {
 		return nil, err
 	}
-	blockSize, err := d.getBlockSize()
+	blockSize, err := d.GetBlockSize()
 	if err != nil {
 		return nil, err
 	}
