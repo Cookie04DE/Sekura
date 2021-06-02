@@ -212,5 +212,5 @@ func (d Disk) WritePartition(password string, blockCount int64) (*Partition, err
 	if err != nil {
 		return nil, err
 	}
-	return &Partition{blockSize: blockSize, blocks: blocks}, nil
+	return &Partition{blockSize: blockSize, blocks: blocks, Disk: &d}, nil
 }
