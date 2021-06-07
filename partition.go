@@ -145,5 +145,5 @@ func (par Partition) Delete() error {
 		}
 		delete(par.Disk.usedBlocks, b.blockNum)
 	}
-	return nil
+	return par.Sync()
 }
