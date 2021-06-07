@@ -153,7 +153,7 @@ scanloop:
 		switch cmd {
 		default:
 			fmt.Println("Unknown cmd")
-		case "quit", "q":
+		case "quit", "exit", "q":
 			break scanloop
 		case "adddisk":
 			fmt.Print("Enter path: ")
