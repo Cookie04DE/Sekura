@@ -127,7 +127,7 @@ func (par *Partition) Mount() (string, *buse.Device) {
 		go func() {
 			err := bd.Run()
 			if err != nil {
-				log.Fatal("Hallo ", err)
+				log.Fatal("Error running buse device: ", err)
 			}
 		}()
 		if err != nil {
