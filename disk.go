@@ -135,7 +135,7 @@ func (d Disk) GetPartition(password string) (*Partition, error) {
 	if err != nil {
 		return nil, err
 	}
-	blocks := []*Block{}
+	var blocks []*Block
 	blockCount, err := d.GetBlockCount()
 	if err != nil {
 		return nil, err
