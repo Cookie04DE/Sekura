@@ -175,36 +175,15 @@ func (d Disk) WritePartition(password string, blockCount int64) (*Partition, err
 	if err != nil {
 		return nil, err
 	}
-	blocksOnDisk, err := d.GetBlockCount()
-	if err != nil {
-		return nil, err
-	}
-	bigBlocksOnDisk := big.NewInt(blocksOnDisk)
 	var lastBlock *Block
 	blocks := make([]*Block, 0, blockCount)
 	for i := int64(0); i < blockCount; i++ {
-		var blockID int64
-		for true {
-			if len(d.usedBlocks) == int(blocksOnDisk) {
-				return nil, errors.New("all blocks allocated")
-			}
-			r, err := rand.Int(rand.Reader, bigBlocksOnDisk)
-			if err != nil {
-				log.Fatal(err)
-			}
-			blockID = r.Int64()
-			_, used := d.usedBlocks[blockID]
-			if !used {
-				break
-			}
-		}
-		d.usedBlocks[blockID] = struct{}{}
-		block, err := d.GetBlock(blockID, key)
+		block, err := d.allocateBlock(key)
 		if err != nil {
 			return nil, err
 		}
 		if lastBlock != nil {
-			err = lastBlock.Write(blockID)
+			err = lastBlock.Write(block.num)
 			if err != nil {
 				return nil, err
 			}
@@ -223,4 +202,29 @@ func (d Disk) WritePartition(password string, blockCount int64) (*Partition, err
 	par := &Partition{blockSize: blockSize, blocks: blocks, Disk: &d}
 	d.Partitions[password] = par
 	return par, nil
+}
+
+func (d Disk) allocateBlock(key []byte) (*Block, error) {
+	blocksOnDisk, err := d.GetBlockCount()
+	if err != nil {
+		return nil, err
+	}
+	bigBlocksOnDisk := big.NewInt(blocksOnDisk)
+	var blockID int64
+	for true {
+		if len(d.usedBlocks) == int(blocksOnDisk) {
+			return nil, errors.New("all blocks allocated")
+		}
+		r, err := rand.Int(rand.Reader, bigBlocksOnDisk)
+		if err != nil {
+			log.Fatal(err)
+		}
+		blockID = r.Int64()
+		_, used := d.usedBlocks[blockID]
+		if !used {
+			break
+		}
+	}
+	d.usedBlocks[blockID] = struct{}{}
+	return d.GetBlock(blockID, key)
 }
