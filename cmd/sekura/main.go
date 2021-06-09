@@ -137,7 +137,7 @@ func runStandaloneMode() {
 	if unix.Geteuid() != 0 {
 		log.Fatal("Sekura requires root permissions to work")
 	}
-	disks := []rubberhose.Disk{}
+	disks := []*rubberhose.Disk{}
 	scanner := bufio.NewScanner(os.Stdin)
 scanloop:
 	for {
@@ -181,7 +181,7 @@ scanloop:
 				fmt.Println("Error reading disk block count: " + err.Error())
 				continue scanloop
 			}
-			disks = append(disks, *disk)
+			disks = append(disks, disk)
 			fmt.Printf("Success! Disk num %d (Blocksize: %s, Blockcount: %d).\n", len(disks), ByteSizeToHumanReadable(bs), bc)
 		case "createdisk":
 			fmt.Print("Enter path: ")
@@ -204,7 +204,7 @@ scanloop:
 				continue scanloop
 			}
 			var blockCount int64
-			var disk rubberhose.Disk
+			var disk *rubberhose.Disk
 			if _, err := os.Stat(absPath); err != nil {
 				f, err := os.Create(absPath)
 				if err != nil {
@@ -227,7 +227,7 @@ scanloop:
 				if err != nil {
 					fmt.Println("Error opening disk: " + err.Error())
 				}
-				disk = *d
+				disk = d
 			}
 			err = disk.Write(int64(bs), blockCount)
 			if err != nil {
