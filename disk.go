@@ -35,7 +35,7 @@ func NewDisk(path string) (*Disk, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Disk{File: f, usedBlocks: make(map[int64]struct{})}, nil
+	return NewDiskFromFile(f), nil
 }
 
 func NewDiskFromFile(f *os.File) Disk {
