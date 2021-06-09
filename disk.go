@@ -38,8 +38,8 @@ func NewDisk(path string) (*Disk, error) {
 	return NewDiskFromFile(f), nil
 }
 
-func NewDiskFromFile(f *os.File) Disk {
-	return Disk{File: f, usedBlocks: make(map[int64]struct{})}
+func NewDiskFromFile(f *os.File) *Disk {
+	return &Disk{File: f, usedBlocks: map[int64]struct{}{}}
 }
 
 func (d Disk) Verify() error {
