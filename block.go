@@ -34,7 +34,7 @@ type Block struct {
 	maxOffset int64
 
 	size      int64
-	blockNum  int64
+	num       int64
 	nextBlock int64
 
 	blockCipher cipher.Block
@@ -50,7 +50,7 @@ func NewBlock(d *Disk, key []byte, off, num, size int64) (*Block, error) {
 		return nil, err
 	}
 	offset := size*num + off
-	return &Block{Disk: d, offset: offset, blockNum: num, maxOffset: offset + size, size: size, blockCipher: bc}, nil
+	return &Block{Disk: d, offset: offset, num: num, maxOffset: offset + size, size: size, blockCipher: bc}, nil
 }
 
 func (b *Block) GetDataSize() int64 {
@@ -222,6 +222,6 @@ func (b *Block) Delete() error {
 		return err
 	}
 	_, err = io.CopyN(b.File, rand.Reader, b.size)
-	delete(b.Disk.usedBlocks, b.blockNum)
+	delete(b.Disk.usedBlocks, b.num)
 	return err
 }
