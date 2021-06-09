@@ -93,7 +93,7 @@ func (par *Partition) orderBlocks() error {
 				blockToRemove = i
 				break
 			}
-			lastBlockNum := finished[len(finished)-1].blockNum
+			lastBlockNum := finished[len(finished)-1].num
 			if nextBlockNum == lastBlockNum {
 				finished = append(finished, b)
 				blockToRemove = i
@@ -143,7 +143,7 @@ func (par Partition) Delete() error {
 		if err != nil {
 			return err
 		}
-		delete(par.Disk.usedBlocks, b.blockNum)
+		delete(par.Disk.usedBlocks, b.num)
 	}
 	return par.Sync()
 }
