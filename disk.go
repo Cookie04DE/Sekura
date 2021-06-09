@@ -27,6 +27,7 @@ const (
 
 type Disk struct {
 	*os.File
+	Partitions map[string]*Partition
 	usedBlocks map[int64]struct{}
 }
 
@@ -39,7 +40,7 @@ func NewDisk(path string) (*Disk, error) {
 }
 
 func NewDiskFromFile(f *os.File) *Disk {
-	return &Disk{File: f, usedBlocks: map[int64]struct{}{}}
+	return &Disk{File: f, usedBlocks: map[int64]struct{}{}, Partitions: map[string]*Partition{}}
 }
 
 func (d Disk) Verify() error {
@@ -131,6 +132,9 @@ func (d Disk) getKey(password string) ([]byte, error) {
 }
 
 func (d Disk) GetPartition(password string) (*Partition, error) {
+	if par, ok := d.Partitions[password]; ok {
+		return par, nil
+	}
 	key, err := d.getKey(password)
 	if err != nil {
 		return nil, err
@@ -159,10 +163,14 @@ func (d Disk) GetPartition(password string) (*Partition, error) {
 	}
 	part := &Partition{blockSize: blockSize, blocks: blocks, Disk: &d}
 	err = part.orderBlocks()
+	d.Partitions[password] = part
 	return part, err
 }
 
 func (d Disk) WritePartition(password string, blockCount int64) (*Partition, error) {
+	if par, ok := d.Partitions[password]; ok {
+		return par, nil
+	}
 	key, err := d.getKey(password)
 	if err != nil {
 		return nil, err
@@ -212,5 +220,7 @@ func (d Disk) WritePartition(password string, blockCount int64) (*Partition, err
 	if err != nil {
 		return nil, err
 	}
-	return &Partition{blockSize: blockSize, blocks: blocks, Disk: &d}, nil
+	par := &Partition{blockSize: blockSize, blocks: blocks, Disk: &d}
+	d.Partitions[password] = par
+	return par, nil
 }
