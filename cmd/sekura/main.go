@@ -244,9 +244,9 @@ scanloop:
 			case Continue:
 				continue scanloop
 			}
-			path, bd := partition.Mount()
+			path, bd := partition.Expose()
 			defer bd.Disconnect()
-			fmt.Printf("Success! Partition mounted as %s! Blockcount: %d, Total Size: %s\n", path, partition.GetBlockCount(), ByteSizeToHumanReadable(partition.GetDataSize()))
+			fmt.Printf("Success! Partition exposed as %s! Blockcount: %d, Total Size: %s\n", path, partition.GetBlockCount(), ByteSizeToHumanReadable(partition.GetDataSize()))
 		case "createpartition":
 			fmt.Print("Enter disk num: ")
 			if !scanner.Scan() {
@@ -284,9 +284,9 @@ scanloop:
 				fmt.Println("Error writing partition: " + err.Error())
 				continue scanloop
 			}
-			path, bd := partition.Mount()
+			path, bd := partition.Expose()
 			defer bd.Disconnect()
-			fmt.Printf("Success! Partition mounted as %s!\n", path)
+			fmt.Printf("Success! Partition exposed as %s!\n", path)
 		case "delete":
 			state, partition := getPartition(disks, scanner, true)
 			switch state {

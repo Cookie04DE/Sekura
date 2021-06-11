@@ -121,7 +121,7 @@ func (par *Partition) Close() error {
 
 var counter int
 
-func (par *Partition) Mount() (string, *buse.Device) {
+func (par *Partition) Expose() (string, *buse.Device) {
 	for {
 		path := fmt.Sprintf("/dev/nbd%d", counter)
 		counter++

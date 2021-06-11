@@ -87,7 +87,7 @@ func main() {
 							}
 							break
 						}
-						devicePath, _ := partition.Mount()
+						devicePath, _ := partition.Expose()
 						if err != nil {
 							err := e.Encode(&rubberhose.AddResponse{Error: err.Error()})
 							if err != nil {
