@@ -11,9 +11,15 @@ import (
 
 type Partition struct {
 	*Disk
+	*ExposedPartition
 	blockSize int64
 	key       []byte
 	blocks    []*Block
+}
+
+type ExposedPartition struct {
+	*buse.Device
+	Path string
 }
 
 func NewPartition(blockSize int64, blocks []*Block) Partition {
@@ -126,18 +132,31 @@ func (par *Partition) Expose() (string, *buse.Device) {
 	for {
 		path := fmt.Sprintf("/dev/nbd%d", counter)
 		counter++
-		bd, err := buse.NewDevice(path, par.GetDataSize(), par)
-		go func() {
-			err := bd.Run()
-			if err != nil {
-				log.Fatal("Error running buse device: ", err)
-			}
-		}()
+		bd, err := par.ExposePath(path)
 		if err != nil {
 			continue
 		}
 		return path, bd
 	}
+}
+
+func (par *Partition) ExposePath(path string) (*buse.Device, error) {
+	if ep := par.ExposedPartition; ep != nil {
+		ep.Device.Disconnect()
+		par.ExposedPartition = nil
+	}
+	bd, err := buse.NewDevice(path, par.GetDataSize(), par)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		err := bd.Run()
+		if err != nil {
+			log.Fatal("Error running buse device: ", err)
+		}
+	}()
+	par.ExposedPartition = &ExposedPartition{Path: path, Device: bd}
+	return bd, nil
 }
 
 func (par Partition) Delete() error {
