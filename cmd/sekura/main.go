@@ -330,7 +330,7 @@ func getPartition(disks []*rubberhose.Disk, scanner *bufio.Scanner, ignoreInvali
 	password := ""
 	pw := getPassword(&password, false)
 	partition, err := disk.GetPartition(pw)
-	if err != nil && !(err == rubberhose.InvalidBlockStructure && ignoreInvalidBlockStructure) {
+	if err != nil && !(err == rubberhose.ErrInvalidBlockStructure && ignoreInvalidBlockStructure) {
 		fmt.Println("Error opening partition: " + err.Error())
 		return Continue, nil
 	}

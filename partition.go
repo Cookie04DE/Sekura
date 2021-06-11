@@ -75,7 +75,7 @@ func (par *Partition) GetDataSize() int64 {
 	return size
 }
 
-var InvalidBlockStructure = errors.New("invalid block structure")
+var ErrInvalidBlockStructure = errors.New("invalid block structure")
 
 func (par *Partition) orderBlocks() error {
 	blocks := par.blocks
@@ -103,7 +103,7 @@ func (par *Partition) orderBlocks() error {
 			}
 		}
 		if blockToRemove == -1 {
-			return InvalidBlockStructure
+			return ErrInvalidBlockStructure
 		}
 		blocks[len(blocks)-1], blocks[blockToRemove] = blocks[blockToRemove], blocks[len(blocks)-1]
 		blocks = blocks[:len(blocks)-1]
