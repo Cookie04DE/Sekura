@@ -12,6 +12,7 @@ import (
 type Partition struct {
 	*Disk
 	blockSize int64
+	key       []byte
 	blocks    []*Block
 }
 

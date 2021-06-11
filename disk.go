@@ -161,7 +161,7 @@ func (d Disk) GetPartition(password string) (*Partition, error) {
 	if err != nil {
 		return nil, err
 	}
-	part := &Partition{blockSize: blockSize, blocks: blocks, Disk: &d}
+	part := &Partition{blockSize: blockSize, blocks: blocks, Disk: &d, key: key}
 	err = part.orderBlocks()
 	d.Partitions[password] = part
 	return part, err
@@ -199,7 +199,7 @@ func (d Disk) WritePartition(password string, blockCount int64) (*Partition, err
 	if err != nil {
 		return nil, err
 	}
-	par := &Partition{blockSize: blockSize, blocks: blocks, Disk: &d}
+	par := &Partition{blockSize: blockSize, blocks: blocks, Disk: &d, key: key}
 	d.Partitions[password] = par
 	return par, nil
 }
