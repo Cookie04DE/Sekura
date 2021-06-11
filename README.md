@@ -48,6 +48,14 @@ This adds a previously created partition.
 Sekura will ask you for the number of the disk and a password.
 ### delete:
 This deletes a partition by overwriting all blocks in it with random data.
+### resize:
+This resizes a partition by either deleting blocks at the end or adding new ones.
+
+**Warning:** Potential **data loss**:
+
+While shrinking: Make sure that no needed data is on the last blocks.
+
+While growing: Make sure that all partitions are added.
 # How to use added partitions:
 
 Once a partition is created/added you will receive the path to the block device (e.g. "/dev/nbd0").
