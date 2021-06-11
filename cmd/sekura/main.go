@@ -237,7 +237,7 @@ scanloop:
 			disks = append(disks, disk)
 			fmt.Printf("Success! Disk num %d.\n", len(disks))
 		case "addpartition":
-			state, partition := getPartition(disks, scanner, true)
+			state, partition := getPartition(disks, scanner, false)
 			switch state {
 			case Break:
 				break scanloop
