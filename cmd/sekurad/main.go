@@ -88,12 +88,6 @@ func main() {
 							break
 						}
 						devicePath, _ := partition.Expose()
-						if err != nil {
-							err := e.Encode(&rubberhose.AddResponse{Error: err.Error()})
-							if err != nil {
-								break outer
-							}
-						}
 						err = e.Encode(&rubberhose.AddResponse{DevicePath: devicePath})
 						if err != nil {
 							break outer
