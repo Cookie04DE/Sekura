@@ -237,26 +237,11 @@ scanloop:
 			disks = append(disks, disk)
 			fmt.Printf("Success! Disk num %d.\n", len(disks))
 		case "addpartition":
-			fmt.Print("Enter disk num: ")
-			if !scanner.Scan() {
+			state, partition := getPartition(disks, scanner, true)
+			switch state {
+			case Break:
 				break scanloop
-			}
-			diskNum, err := strconv.Atoi(scanner.Text())
-			if err != nil {
-				fmt.Println("Error parsing disk num: " + err.Error())
-				continue scanloop
-			}
-			if diskNum > len(disks) {
-				fmt.Println("Invalid disk num")
-				continue scanloop
-			}
-			diskNum--
-			disk := disks[diskNum]
-			password := ""
-			pw := getPassword(&password, false)
-			partition, err := disk.GetPartition(pw)
-			if err != nil {
-				fmt.Println("Error opening partition: " + err.Error())
+			case Continue:
 				continue scanloop
 			}
 			path, bd := partition.Mount()
@@ -303,29 +288,14 @@ scanloop:
 			defer bd.Disconnect()
 			fmt.Printf("Success! Partition mounted as %s!\n", path)
 		case "delete":
-			fmt.Print("Enter disk num: ")
-			if !scanner.Scan() {
+			state, partition := getPartition(disks, scanner, true)
+			switch state {
+			case Break:
 				break scanloop
-			}
-			diskNum, err := strconv.Atoi(scanner.Text())
-			if err != nil {
-				fmt.Println("Error parsing disk num: " + err.Error())
+			case Continue:
 				continue scanloop
 			}
-			if diskNum > len(disks) {
-				fmt.Println("Invalid disk num")
-				continue scanloop
-			}
-			diskNum--
-			disk := disks[diskNum]
-			password := ""
-			pw := getPassword(&password, false)
-			partition, err := disk.GetPartition(pw)
-			if err != nil {
-				fmt.Println("Error opening partition: " + err.Error())
-				continue scanloop
-			}
-			err = partition.Delete()
+			err := partition.Delete()
 			if err != nil {
 				fmt.Println("Error deleting partition: " + err.Error())
 				continue scanloop
@@ -333,6 +303,40 @@ scanloop:
 			fmt.Println("Successfully deleted partition.")
 		}
 	}
+}
+
+type ReturnState int
+
+const (
+	Break ReturnState = iota
+	Continue
+	Nothing
+)
+
+func getPartition(disks []*rubberhose.Disk, scanner *bufio.Scanner, ignoreInvalidBlockStructure bool) (ReturnState, *rubberhose.Partition) {
+	fmt.Print("Enter disk num: ")
+	if !scanner.Scan() {
+		return Break, nil
+	}
+	diskNum, err := strconv.Atoi(scanner.Text())
+	if err != nil {
+		fmt.Println("Error parsing disk num: " + err.Error())
+		return Continue, nil
+	}
+	if diskNum > len(disks) {
+		fmt.Println("Invalid disk num")
+		return Continue, nil
+	}
+	diskNum--
+	disk := disks[diskNum]
+	password := ""
+	pw := getPassword(&password, false)
+	partition, err := disk.GetPartition(pw)
+	if err != nil && !(err == rubberhose.InvalidBlockStructure && ignoreInvalidBlockStructure) {
+		fmt.Println("Error opening partition: " + err.Error())
+		return Continue, nil
+	}
+	return Nothing, partition
 }
 
 func ByteSizeToHumanReadable(size int64) string {
