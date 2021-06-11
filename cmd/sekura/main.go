@@ -299,6 +299,30 @@ scanloop:
 				continue scanloop
 			}
 			fmt.Println("Successfully deleted partition.")
+		case "resize":
+			state, partition := getPartition(disks, scanner, false)
+			switch state {
+			case Break:
+				break scanloop
+			case Continue:
+				continue scanloop
+			}
+			fmt.Print("Enter new block count: ")
+			if !scanner.Scan() {
+				break scanloop
+			}
+			blockCount, err := strconv.Atoi(scanner.Text())
+			if err != nil {
+				fmt.Println("Error parsing block count: " + err.Error())
+				continue scanloop
+			}
+			err = partition.Resize(blockCount)
+			if err != nil {
+				fmt.Println("Error resizing partition: " + err.Error())
+				continue scanloop
+			}
+			path, _ := partition.Expose()
+			fmt.Println("Successfully resized partition. Exposed as ", path, "!")
 		}
 	}
 }

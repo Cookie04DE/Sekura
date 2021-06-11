@@ -169,3 +169,33 @@ func (par Partition) Delete() error {
 	}
 	return par.Sync()
 }
+
+func (par *Partition) Resize(blockCount int) error {
+	delta := blockCount - len(par.blocks)
+	if delta == 0 {
+		return nil
+	}
+	if delta > 0 {
+		lastBlock := par.blocks[len(par.blocks)-1]
+		for i := 0; i < delta; i++ {
+			block, err := par.Disk.allocateBlock(par.key)
+			if err != nil {
+				return err
+			}
+			if err := lastBlock.Write(block.num); err != nil {
+				return err
+			}
+			par.blocks = append(par.blocks, block)
+		}
+	} else {
+		off := len(par.blocks) + delta
+		toDelete := par.blocks[off:]
+		par.blocks = par.blocks[:off]
+		for _, b := range toDelete {
+			if err := b.Delete(); err != nil {
+				return err
+			}
+		}
+	}
+	return par.blocks[len(par.blocks)-1].Write(-1)
+}
