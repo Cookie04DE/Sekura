@@ -17,7 +17,7 @@ func TestBlock(t *testing.T) {
 	_, err = rand.Read(key)
 	require.NoError(t, err)
 	d := rubberhose.NewDiskFromFile(f)
-	block, err := rubberhose.NewBlock(&d, key, 0, 0, rubberhose.MinBlockSize+32)
+	block, err := rubberhose.NewBlock(d, key, 0, 0, rubberhose.MinBlockSize+32)
 	require.NoError(t, err)
 	err = block.Validate()
 	require.Error(t, err)
